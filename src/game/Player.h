@@ -938,8 +938,12 @@ class MANGOS_DLL_SPEC Player : public Unit
             else if (state > 0)
                 m_ExtraFlags |= PLAYER_EXTRA_AUCTION_NEUTRAL;
         }
-
-
+        
+//***** MOD: Willem ************************************************************
+        void uint32::GetXP();
+        void uint32::GetXPToLevel();
+//***** END MOD ****************************************************************
+        
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel(uint32 level);
 

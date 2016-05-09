@@ -169,13 +169,14 @@ public:
 
     enum CollectionFlags
     {
-        COLLECT_FLAG_NOTHING    = 0x00,     // skip looting of anything
-        COLLECT_FLAG_COMBAT     = 0x01,     // loot after combat
-        COLLECT_FLAG_QUEST      = 0x02,     // quest and needed items
-        COLLECT_FLAG_PROFESSION = 0x04,     // items related to skills
-        COLLECT_FLAG_LOOT       = 0x08,     // all loot on corpses
-        COLLECT_FLAG_SKIN       = 0x10,     // skin creatures if available
-        COLLECT_FLAG_NEAROBJECT = 0x20      // collect specified nearby object
+        COLLECT_FLAG_NOTHING     = 0x00,     // skip looting of anything
+        COLLECT_FLAG_COMBAT      = 0x01,     // loot after combat
+        COLLECT_FLAG_QUEST       = 0x02,     // quest and needed items
+        COLLECT_FLAG_PROFESSION  = 0x04,     // items related to skills
+        COLLECT_FLAG_LOOT        = 0x08,     // all loot on corpses
+        COLLECT_FLAG_SKIN        = 0x10,     // skin creatures if available
+        COLLECT_FLAG_NEAROBJECT  = 0x20,      // collect specified nearby object
+        COLLECT_FLAG_USEFULLLOOT = 0x40,     // all loot on corpses
     };
 
     enum MovementOrderType
@@ -530,6 +531,7 @@ private:
     void _HandleCommandSurvey(std::string &text, Player &fromPlayer);
     void _HandleCommandSkill(std::string &text, Player &fromPlayer);
     void _HandleCommandStats(std::string &text, Player &fromPlayer);
+    void _HandleCommandXp(std::string &text, Player &fromPlayer);
     void _HandleCommandHelp(std::string &text, Player &fromPlayer);
     void _HandleCommandHelp(const char* szText, Player &fromPlayer) { std::string text = szText; _HandleCommandHelp(text, fromPlayer); }
     std::string _HandleCommandHelpHelper(std::string sCommand, std::string sExplain, HELPERLINKABLES reqLink = HL_NONE, bool bReqLinkMultiples = false, bool bCommandShort = false);

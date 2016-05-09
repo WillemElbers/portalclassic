@@ -2244,6 +2244,14 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
     GetSession()->SendPacket(&data);
 }
 
+void uint32::GetXP() {
+    return GetUInt32Value(PLAYER_XP);
+}
+
+void uint32::GetXPToLevel() {
+    return GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
+}
+
 void Player::GiveXP(uint32 xp, Unit* victim)
 {
     if (xp < 1)

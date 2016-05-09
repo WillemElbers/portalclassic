@@ -83,7 +83,7 @@ m_taxiMaster(ObjectGuid())
     if (m_mgr->m_confCollectProfession)
         SetCollectFlag(COLLECT_FLAG_PROFESSION);
     if (m_mgr->m_confCollectLoot)
-        SetCollectFlag(COLLECT_FLAG_LOOT);
+        SetCollectFlag(COLLECT_FLAG_USEFULLLOOT);
     if (m_mgr->m_confCollectSkin && m_bot->HasSkill(SKILL_SKINNING))
         SetCollectFlag(COLLECT_FLAG_SKIN);
     if (m_mgr->m_confCollectObjects)
@@ -533,7 +533,9 @@ bool PlayerbotAI::IsItemUseful(uint32 itemid)
     };
 
     ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid);
-    if (!pProto || pProto->Quality < ITEM_QUALITY_NORMAL)
+    //if (!pProto || pProto->Quality < ITEM_QUALITY_NORMAL)
+    //Skip anything below green items
+    if (!pProto || pProto->Quality < ITEM_QUALITY_UNCOMMON) 
         return false;
 
     // do we already have the max allowed of item if more than zero?
@@ -1335,7 +1337,13 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
                 // If bot is skinning or has collect all orders: autostore all items
                 // else bot has order to only loot quest or useful items
-                if (loot_type == LOOT_SKINNING || HasCollectFlag(COLLECT_FLAG_LOOT) || (loot_type == LOOT_CORPSE && (IsInQuestItemList(lootItem->itemId) || IsItemUseful(lootItem->itemId))))
+                if (loot_type == LOOT_SKINNING || 
+                    HasCollectFlag(COLLECT_FLAG_LOOT) || 
+                    (loot_type == LOOT_CORPSE && 
+                        (IsInQuestItemList(lootItem->itemId) || IsItemUseful(lootItem->itemId)))
+                    (HasCollectFlag(COLLECT_FLAG_USEFULLLOOT) && 
+                        (IsInQuestItemList(lootItem->itemId) || IsItemUseful(lootItem->itemId)))
+                )
                 {
                     // item may be blocked by roll system or already looted or another cheating possibility
                     if (lootItem->isBlocked || lootItem->GetSlotTypeForSharedLoot(m_bot, loot) == MAX_LOOT_SLOT_TYPE)
@@ -4426,14 +4434,14 @@ void PlayerbotAI::MakeItemLink(const Item *item, std::ostringstream &out, bool I
     out << "|c";
     switch (proto->Quality)
     {
-        case ITEM_QUALITY_POOR:     out << "ff9d9d9d"; break;  //GREY
-        case ITEM_QUALITY_NORMAL:   out << "ffffffff"; break;  //WHITE
-        case ITEM_QUALITY_UNCOMMON: out << "ff1eff00"; break;  //GREEN
-        case ITEM_QUALITY_RARE:     out << "ff0070dd"; break;  //BLUE
-        case ITEM_QUALITY_EPIC:     out << "ffa335ee"; break;  //PURPLE
+        case ITEM_QUALITY_POOR:      out << "ff9d9d9d"; break;  //GREY
+        case ITEM_QUALITY_NORMAL:    out << "ffffffff"; break;  //WHITE
+        case ITEM_QUALITY_UNCOMMON:  out << "ff1eff00"; break;  //GREEN
+        case ITEM_QUALITY_RARE:      out << "ff0070dd"; break;  //BLUE
+        case ITEM_QUALITY_EPIC:      out << "ffa335ee"; break;  //PURPLE
         case ITEM_QUALITY_LEGENDARY: out << "ffff8000"; break;  //ORANGE
-        case ITEM_QUALITY_ARTIFACT: out << "ffe6cc80"; break;  //LIGHT YELLOW
-        default:                    out << "ffff0000"; break;  //Don't know color, so red?
+        case ITEM_QUALITY_ARTIFACT:  out << "ffe6cc80"; break;  //LIGHT YELLOW
+        default:                     out << "ffff0000"; break;  //Don't know color, so red?
     }
     out << "|Hitem:";
 
@@ -6042,6 +6050,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
     else if (ExtractCommand("stats", input))
         _HandleCommandStats(input, fromPlayer);
 
+    // xp project
+    else if (ExtractCommand("xp", input))
+        _HandleCommandXp(input, fromPlayer);
     else
     {
         // if this looks like an item link, reward item it completed quest and talking to NPC
@@ -6093,7 +6104,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer)
         else
         {
             // TODO: make this only in response to direct whispers (chatting in party chat can in fact be between humans)
-            std::string msg = "What? For a list of commands, ask for 'help'.";
+            std::string msg = "What? For a list of commands, ask for 'help'. Input was: [";
+            msg += input;
+            msg += "]";
             SendWhisper(msg, fromPlayer);
             m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
         }
@@ -6717,6 +6730,8 @@ void PlayerbotAI::_HandleCommandCollect(std::string &text, Player &fromPlayer)
             SetCollectFlag(COLLECT_FLAG_COMBAT);
         else if (ExtractCommand("loot", text))
             SetCollectFlag(COLLECT_FLAG_LOOT);
+        else if (ExtractCommand("useful", text))
+            SetCollectFlag(COLLECT_FLAG_USEFULLLOOT);
         else if (ExtractCommand("quest", text))
             SetCollectFlag(COLLECT_FLAG_QUEST);
         else if (ExtractCommand("profession", text) || ExtractCommand("skill", text))
@@ -7491,7 +7506,7 @@ void PlayerbotAI::_HandleCommandStats(std::string &text, Player &fromPlayer)
     }
 
     std::ostringstream out;
-
+    
     uint32 totalused = 0;
     // list out items in main backpack
     for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++)
@@ -7542,6 +7557,24 @@ void PlayerbotAI::_HandleCommandStats(std::string &text, Player &fromPlayer)
     if (silver > 0)
         out << silver <<  "|r|cffc0c0c0s|r|cff00ff00";
     out << copper <<  "|r|cff95524Cc|r|cff00ff00";
+    ChatHandler ch(&fromPlayer);
+    ch.SendSysMessage(out.str().c_str());
+}
+
+void PlayerbotAI::_HandleCommandXp(std::string &text, Player &fromPlayer) 
+{
+    if (text != "") 
+    {
+        SendWhisper("'xp' does not have subcommands", fromPlayer);
+        return;
+    }
+
+    std::ostringstream out;
+    
+    out << "|cffffffff[|h|cff00ffff" << m_bot->GetName() << "|h|cffffffff] has |cff00ff00";
+    out << m_bot->GetXP() << " |h|cffffffff XP,|h" << " |cff00ff00";
+    out << m_bot->GetXPToLevel() << " |h|cffffffff XP needed to level|h" << " |cff00ff00";
+    
     ChatHandler ch(&fromPlayer);
     ch.SendSysMessage(out.str().c_str());
 }
