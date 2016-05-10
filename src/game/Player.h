@@ -940,8 +940,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         }
         
 //***** MOD: Willem ************************************************************
-        void uint32::GetXP();
-        void uint32::GetXPToLevel();
+        uint32 GetXP();
+        uint32 GetXPToLevel();
 //***** END MOD ****************************************************************
         
         void GiveXP(uint32 xp, Unit* victim);

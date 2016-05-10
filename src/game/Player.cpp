@@ -2244,11 +2244,11 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
     GetSession()->SendPacket(&data);
 }
 
-void uint32::GetXP() {
+uint32 Player::GetXP() {
     return GetUInt32Value(PLAYER_XP);
 }
 
-void uint32::GetXPToLevel() {
+uint32 Player::GetXPToLevel() {
     return GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
 }
 
