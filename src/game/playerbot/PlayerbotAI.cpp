@@ -1340,7 +1340,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 if (loot_type == LOOT_SKINNING || 
                     HasCollectFlag(COLLECT_FLAG_LOOT) || 
                     (loot_type == LOOT_CORPSE && 
-                        (IsInQuestItemList(lootItem->itemId) || IsItemUseful(lootItem->itemId)))
+                        (IsInQuestItemList(lootItem->itemId) || IsItemUseful(lootItem->itemId))) ||
                     (HasCollectFlag(COLLECT_FLAG_USEFULLLOOT) && 
                         (IsInQuestItemList(lootItem->itemId) || IsItemUseful(lootItem->itemId)))
                 )
