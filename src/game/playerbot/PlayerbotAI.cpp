@@ -1301,12 +1301,16 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
         case SMSG_LOOT_RESPONSE:
         {
+
             WorldPacket p(packet); // (8+1+4+1+1+4+4+4+4+4+1)
             ObjectGuid guid;
             uint8 loot_type;
 
             p >> guid;      // 8 corpse guid
             p >> loot_type; // 1 loot type
+
+	    sLog.outDebug("#FRANK# pre 'loot->SendItem' bot:%s SMSG_LOOT_RESPONSE, guid: %d, loot_type: %d",
+                 m_bot->GetGuidStr().c_str(), guid, loot_type);
 
             // Create the loot object and check it exists
             Loot* loot = sLootMgr.GetLoot(m_bot, guid);
@@ -1329,6 +1333,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             {
                 LootItem* lootItem = *lootItr;
 
+		sLog.outDebug("#FRANK# pre 1 'loot->SendItem' bot:%s itemId:%u freeForAll:%d, isUsefull: %d",
+                 m_bot->GetGuidStr().c_str(), lootItem->itemId, lootItem->freeForAll, IsItemUseful(lootItem->itemId));
+
                 // Skip non lootable items
                 if (lootItem->GetSlotTypeForSharedLoot(m_bot, loot) != LOOT_SLOT_NORMAL)
                     continue;
@@ -1345,7 +1352,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     }
 
 
-		sLog.outDebug("#FRANK# pre 'loot->SendItem' bot:%s itemId:%u freeForAll:%d", 
+		sLog.outDebug("#FRANK# pre 2 'loot->SendItem' bot:%s itemId:%u freeForAll:%d", 
                 m_bot->GetGuidStr().c_str(), lootItem->itemId, lootItem->freeForAll);
 
 
@@ -2574,6 +2581,9 @@ void PlayerbotAI::DoLoot()
         if (c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
             skillId = c->GetCreatureInfo()->GetRequiredLootSkill();
 
+	sLog.outDebug("#FRANK# pre 'loot->doLoot' bot:%s hasFlag lootable:%d", 
+                m_bot->GetGuidStr().c_str(), c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE));
+
         // not a lootable creature, clear it
         if (!c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE) &&
             (!c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE) ||
@@ -2604,8 +2614,15 @@ void PlayerbotAI::DoLoot()
 
         if (c)  // creature
         {
+
+            		
+
             if (c->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE) && !c->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
             {
+
+		sLog.outDebug("#FRANK# pre 'loot->doLoot' bot:%s sending loot packet",
+                    m_bot->GetGuidStr().c_str());
+
                 // loot the creature
                 WorldPacket* const packet = new WorldPacket(CMSG_LOOT, 8);
                 *packet << m_lootCurrent;
