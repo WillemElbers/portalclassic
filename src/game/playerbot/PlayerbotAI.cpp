@@ -1344,6 +1344,11 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         continue;
                     }
 
+
+		sLog.outDebug("#FRANK# pre 'loot->SendItem' bot:%s itemId:%u freeForAll:%d", 
+                m_bot->GetGuidStr().c_str(), lootItem->itemId, lootItem->freeForAll);
+
+
                     // Try to send the item to bot
                     InventoryResult result = loot->SendItem(m_bot, lootItem);
 
