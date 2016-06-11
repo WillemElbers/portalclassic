@@ -1373,7 +1373,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     if (result == EQUIP_ERR_OK && lguid.IsItem())
                     {
                         if (Item* item = m_bot->GetItemByGuid(lguid)) {
-                            if ( item->freeForAll ) {
+                            if ( lootItem->freeForAll ) {
                                 // don't change item state for FFA items, because downstream SetLootState()
                                 //code never checks if item is FFA and useful for anyone else
                                 // bots that already looted this item will ignore it afterwards because it
