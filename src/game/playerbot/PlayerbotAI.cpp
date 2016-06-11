@@ -1372,8 +1372,21 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     // then change item's loot state
                     if (result == EQUIP_ERR_OK && lguid.IsItem())
                     {
-                        if (Item* item = m_bot->GetItemByGuid(lguid))
-                            item->SetLootState(ITEM_LOOT_CHANGED);
+                        if (Item* item = m_bot->GetItemByGuid(lguid)) {
+                            if ( item->freeForAll ) {
+                                // don't change item state for FFA items, because downstream SetLootState()
+                                //code never checks if item is FFA and useful for anyone else
+                                // bots that already looted this item will ignore it afterwards because it
+                                //will fail the IsItemUseful(itemid) check
+                                // TODO; to allow skinning of corpse, may need additional code to empty
+                                //quest items in corpses that cannot be looted by anyone
+                                sLog.outDebug("#FRANK# post 'loot->SendItem' FFA item looted, don't change
+                                    lootState. bot:%s itemId:%u freeForAll:%d",
+                                    m_bot->GetGuidStr().c_str(), lootItem->itemId, lootItem->freeForAll);
+                            } else {
+                                item->SetLootState(ITEM_LOOT_CHANGED);
+                            }
+                        }
                     }
                 }
             }
