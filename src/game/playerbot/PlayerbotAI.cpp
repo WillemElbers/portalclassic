@@ -1380,8 +1380,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                                 //will fail the IsItemUseful(itemid) check
                                 // TODO; to allow skinning of corpse, may need additional code to empty
                                 //quest items in corpses that cannot be looted by anyone
-                                sLog.outDebug("#FRANK# post 'loot->SendItem' FFA item looted, don't change
-                                    lootState. bot:%s itemId:%u freeForAll:%d",
+                                sLog.outDebug("#FRANK# post 'loot->SendItem' FFA item looted, don't change lootState. bot:%s itemId:%u freeForAll:%d",
                                     m_bot->GetGuidStr().c_str(), lootItem->itemId, lootItem->freeForAll);
                             } else {
                                 item->SetLootState(ITEM_LOOT_CHANGED);
